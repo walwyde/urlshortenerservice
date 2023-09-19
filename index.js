@@ -65,7 +65,7 @@ app.post("/api/shorturl", function (req, res) {
 
     console.log(host);
 
-    if(!host) return res.json({ error: "invalid url" });
+    if (!host) return res.json({ error: "invalid url" });
 
     let existing = null;
 
@@ -76,7 +76,7 @@ app.post("/api/shorturl", function (req, res) {
       urls = data;
 
       data.forEach(function (url) {
-        if (url.original_url === host) {
+        if (url.original_url === "https://" + host) {
           return (existing = url);
         }
       });
@@ -92,11 +92,14 @@ app.post("/api/shorturl", function (req, res) {
         console.log(address);
         console.log(family);
         const short_url = Object.keys(data).length + 1;
-        const urlObj = { original_url: host, short_url: short_url };
+        const urlObj = {
+          original_url: "https://" + host,
+          short_url: short_url,
+        };
         data.push(urlObj);
         console.log(data);
         saveUrls(data);
-        res.json({ original_url: host, short_url: short_url });
+        res.json(urlObj);
       });
     });
   } catch (ex) {
@@ -120,7 +123,7 @@ app.get("/api/shorturl/:shorturl", (req, res, next) => {
         }
       });
       if (address) {
-        return res.redirect("https://" + address);
+        return res.redirect(address);
       } else {
         res.status(400).json({ error: "invalid short_url" });
       }
