@@ -5,7 +5,6 @@ const app = express();
 const dns = require("dns");
 const fs = require("fs");
 const path = require("path");
-const e = require("express");
 
 const db = path.join(path.dirname(process.mainModule.filename), "urls.json");
 
@@ -27,7 +26,6 @@ const saveUrls = (urls) => {
     }
   });
 };
-
 const formatHostname = (hostname) => {
   let address = null;
   if (hostname.indexOf("s://") !== -1) {
@@ -93,7 +91,7 @@ app.post("/api/shorturl", function (req, res) {
         console.log(family);
         const short_url = Object.keys(data).length + 1;
         const urlObj = {
-          original_url: "https://" + host,
+          original_url: "https://" + host.toString(),
           short_url: short_url,
         };
         data.push(urlObj);
