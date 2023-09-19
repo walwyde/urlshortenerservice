@@ -37,6 +37,7 @@ const formatHostname = (hostname) => {
     address = hostname.split("").splice(7);
     return address.join("");
   }
+  return hostname;
 };
 
 app.use(express.json());
