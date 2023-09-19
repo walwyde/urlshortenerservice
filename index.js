@@ -64,6 +64,8 @@ app.post("/api/shorturl", function (req, res) {
 
     console.log(host);
 
+    if(!host) return res.json({ error: "invalid url" });
+
     let existing = null;
 
     readUrls((err, data) => {
