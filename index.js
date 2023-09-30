@@ -6,7 +6,7 @@ const dns = require("dns");
 const fs = require("fs");
 const path = require("path");
 
-const db = path.join(path.dirname(process.mainModule.filename), "urls.json");
+const db = process.cwd() + "/urls.json";
 
 const readUrls = (done) => {
   fs.readFile(db, (err, data) => {
@@ -27,15 +27,30 @@ const saveUrls = (urls) => {
   });
 };
 const formatHostname = (hostname) => {
-  let address = null;
+  let address = hostname;
+  let tail = null;
   if (hostname.indexOf("s://") !== -1) {
-    address = hostname.split("").splice(8);
-    return address.join("");
+    split = hostname.split("").splice(8);
+    address = split.join("");
   } else if (hostname.indexOf("p://") !== -1) {
-    address = hostname.split("").splice(7);
-    return address.join("");
+    split = hostname.split("").splice(7);
+    address = split.join("");
   }
-  return hostname;
+
+  const result =
+    address.indexOf(".com/") ||
+    address.indexOf(".net/") ||
+    address.indexOf(".org/");
+
+  if (result !== -1) {
+    tail = address
+      .split("")
+      .splice(result + 5)
+      .join("");
+    const head = address.split("").splice(0, result + 5);
+    address = head.join("");
+  }
+  return { host: address, tail };
 };
 
 app.use(express.json());
@@ -59,9 +74,7 @@ app.get("/api/hello", function (req, res) {
 
 app.post("/api/shorturl", function (req, res) {
   try {
-    const host = formatHostname(req.body.url);
-
-    console.log(host);
+    let { host, tail } = formatHostname(req.body.url);
 
     if (!host) return res.json({ error: "invalid url" });
 
@@ -74,8 +87,16 @@ app.post("/api/shorturl", function (req, res) {
       urls = data;
 
       data.forEach(function (url) {
-        if (url.original_url === "https://" + host) {
-          return (existing = url);
+        if (
+          url.original_url === "https://" + host ||
+          url.original_url === "http://" + host
+        ) {
+          return (existing = {
+            original_url: `${url.original_url}${
+              url.url_tail ? `/${url.url_tail}` : ""
+            }`,
+            short_url: url.short_url,
+          });
         }
       });
       if (existing) {
@@ -84,7 +105,7 @@ app.post("/api/shorturl", function (req, res) {
 
       dns.lookup(host, function (err, address, family) {
         if (err) {
-          console.log(err);
+          console.log(err.message);
           return res.json({ error: "invalid url" });
         }
         console.log(address);
@@ -93,15 +114,22 @@ app.post("/api/shorturl", function (req, res) {
         const urlObj = {
           original_url: "https://" + host.toString(),
           short_url: short_url,
+          url_tail: tail !== null && tail,
+          created_at: new Date(),
         };
         data.push(urlObj);
-        console.log(data);
         saveUrls(data);
-        res.json(urlObj);
+        console.log(host, tail);
+
+        if (tail === null) return res.json(urlObj);
+        res.json({
+          original_url: `https://${host}${tail ? tail : ""}`,
+          short_url: short_url,
+        });
       });
     });
   } catch (ex) {
-    console.log(ex);
+    console.log(ex.message);
     res.json({ error: "invalid url" });
   }
 });
@@ -127,7 +155,7 @@ app.get("/api/shorturl/:shorturl", (req, res, next) => {
       }
     });
   } catch (ex) {
-    console.log(ex);
+    console.log(ex.message);
     res.status(500).json({ error: "invalid url" });
   }
 });

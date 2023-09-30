@@ -1,1 +1,20 @@
-[]
+[
+  {
+    "original_url": "https://urlshortenerservice.onrender.com/",
+    "short_url": 1,
+    "url_tail": "?v=1696073966399",
+    "created_at": "2023-09-30T12:51:16.043Z"
+  },
+  {
+    "original_url": "https://freeCodeCamp.org",
+    "short_url": 2,
+    "url_tail": false,
+    "created_at": "2023-09-30T12:53:34.274Z"
+  },
+  {
+    "original_url": "https://urlshortenerservice.onrender.com",
+    "short_url": 3,
+    "url_tail": false,
+    "created_at": "2023-09-30T13:04:56.201Z"
+  }
+]
