@@ -93,7 +93,7 @@ app.post("/api/shorturl", function (req, res) {
         ) {
           return (existing = {
             original_url: `${url.original_url}${
-              url.url_tail ? `/${url.url_tail}` : ""
+              url.url_tail ? `${url.url_tail}` : ""
             }`,
             short_url: url.short_url,
           });
