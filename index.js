@@ -121,7 +121,11 @@ app.post("/api/shorturl", function (req, res) {
         saveUrls(data);
         console.log(host, tail);
 
-        if (tail === null) return res.json(urlObj);
+        if (tail === null)
+          return res.json({
+            original_url: urlObj.original_url,
+            short_url: urlObj.short_url,
+          });
         res.json({
           original_url: `https://${host}${tail ? tail : ""}`,
           short_url: short_url,
