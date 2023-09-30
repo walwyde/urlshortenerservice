@@ -74,10 +74,10 @@ app.get("/api/hello", function (req, res) {
 
 app.post("/api/shorturl", function (req, res) {
   try {
-    console.log({ main: req.body.url });
+    const main = req.body.url;
     let { host, tail } = formatHostname(req.body.url);
 
-    console.log({ host: host, tail: tail });
+    console.log({ main, host, tail });
 
     if (!host) return res.json({ error: "invalid url" });
 
@@ -90,20 +90,17 @@ app.post("/api/shorturl", function (req, res) {
       urls = data;
 
       data.forEach(function (url) {
-        if (
-          url.original_url === "https://" + host ||
-          url.original_url === "http://" + host
-        ) {
-          return (existing = {
-            original_url: `${url.original_url}${
-              url.url_tail ? `${url.url_tail}` : ""
-            }`,
-            short_url: url.short_url,
-          });
+        if (url.original_url === main || url.original_url === main) {
+          return (existing = url);
         }
       });
       if (existing) {
-        return res.status(203).json(existing);
+        return res
+          .status(203)
+          .json({
+            original_url: existing.original_url,
+            short_url: existing.short_url,
+          });
       }
 
       dns.lookup(host, function (err, address, family) {
@@ -115,14 +112,13 @@ app.post("/api/shorturl", function (req, res) {
         console.log(family);
         const short_url = Object.keys(data).length + 1;
         const urlObj = {
-          original_url: "https://" + host.toString(),
+          original_url: main,
           short_url: short_url,
           url_tail: tail !== null && tail,
           created_at: new Date(),
         };
         data.push(urlObj);
         saveUrls(data);
-        console.log(host, tail);
 
         if (tail === null)
           return res.json({
@@ -130,7 +126,7 @@ app.post("/api/shorturl", function (req, res) {
             short_url: urlObj.short_url,
           });
         res.json({
-          original_url: `https://${host}${tail ? tail : ""}`,
+          original_url: main,
           short_url: short_url,
         });
       });
