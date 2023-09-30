@@ -45,9 +45,9 @@ const formatHostname = (hostname) => {
   if (result !== -1) {
     tail = address
       .split("")
-      .splice(result + 5)
+      .splice(result + 4)
       .join("");
-    const head = address.split("").splice(0, result + 5);
+    const head = address.split("").splice(0, result + 4);
     address = head.join("");
   }
   return { host: address, tail };
@@ -95,12 +95,10 @@ app.post("/api/shorturl", function (req, res) {
         }
       });
       if (existing) {
-        return res
-          .status(203)
-          .json({
-            original_url: existing.original_url,
-            short_url: existing.short_url,
-          });
+        return res.status(203).json({
+          original_url: existing.original_url,
+          short_url: existing.short_url,
+        });
       }
 
       dns.lookup(host, function (err, address, family) {
