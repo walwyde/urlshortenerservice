@@ -77,6 +77,8 @@ app.post("/api/shorturl", function (req, res) {
     console.log({ main: req.body.url });
     let { host, tail } = formatHostname(req.body.url);
 
+    console.log({ host: host, tail: tail });
+
     if (!host) return res.json({ error: "invalid url" });
 
     let existing = null;
